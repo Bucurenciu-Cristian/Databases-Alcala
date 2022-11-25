@@ -1,3 +1,4 @@
+--\pset pager off
 
 BEGIN;
 
@@ -12,17 +13,17 @@ CREATE SCHEMA IF NOT EXISTS cal2;
 
 CREATE TABLE IF NOT EXISTS cal2.import_actors(
     name                     TEXT    NOT NULL
-    ,birthday               TEXT    NOT NULL
-    --CONSTRAINS actors_pkey PRIMARY KEY (first_name, last_name, birthday)
+    ,birthday                DATE    
+    
 );
 
---ROLLBACK;
+
 
 CREATE TABLE IF NOT EXISTS cal2.import_movies_actors(
     year                TEXT        NOT NULL
-    ,movie              TEXT        NOT NULL
+    ,title              TEXT        NOT NULL
     ,name               TEXT
-    --CONSTRAINS actors_movies_pkey PRIMARY KEY (year, movie, first_name, last_name)
+    
 );
 
 
@@ -30,20 +31,20 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_actors(
 CREATE TABLE IF NOT EXISTS cal2.import_directors(
     name                TEXT        NOT NULL
     ,birthday           TEXT
-    --CONSTRAINS directors_pkey PRIMARY KEY (first_name, last_name, birthday)
+    
 );
 
 
 
 CREATE TABLE IF NOT EXISTS cal2.import_movies_reviews(
-    year                TEXT        NOT NULL
-    ,title              TEXT        NOT NULL
+    year                INTEGER        NOT NULL
+    ,title              TEXT           NOT NULL
     ,rating             REAL
     ,author             TEXT
     ,content            TEXT
     ,hash               TEXT
     ,webpage            TEXT
-    --CONSTRAINS movies_reviews_pkey PRIMARY KEY (????)
+    
 );
 
 
@@ -52,7 +53,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_directors(
     movie               TEXT        NOT NULL
     ,year               TEXT        NOT NULL
     ,name               TEXT
-    --CONSTRAINS movies_directors_pkey PRIMARY KEY(??)
+    
 );
 
 
@@ -65,34 +66,35 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies(
     ,runtime            TEXT
     ,language           TEXT
     ,mpa_rating         TEXT
-    --CONSTRAINS movies_pkey PRIMARY KEY (??)
+    
 );
 
 
 
 CREATE TABLE IF NOT EXISTS cal2.import_movies_medias(
-    year                TEXT
-    ,title              TEXT
-    ,types              TEXT
-    ,urls               TEXT
-    ,size               TEXT
-    --CONSTRAINS movies_medias_pkey PRIMARY KEY (??)
+    year                TEXT        NOT NULL
+    ,title              TEXT        NOT NULL
+    ,type               TEXT        NOT NULL
+    ,url                TEXT        NOT NULL
+    ,size               TEXT        NOT NULL
+    
 );
 
 
 \echo 'Bulk loading data into import_* tables'
 
-\COPY cal2.import_actors                                FROM 'actors(1).csv'                           WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
-\COPY cal2.import_movies_actors                         FROM 'actors_movies(1).csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
-\COPY cal2.import_directors                             FROM 'directors(1).csv'                        WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
-\COPY cal2.import_movies_reviews                        FROM 'movies_review(1).csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
-\COPY cal2.import_movies_directors                      FROM 'movies_directors(1).csv'                 WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
-\COPY cal2.import_movies                                FROM 'std_movies(1).csv'                       WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
-\COPY cal2.import_movies_medias                         FROM 'movies_medias(1).csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
+\COPY cal2.import_actors                                FROM 'actors.csv'                           WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
+\COPY cal2.import_movies_actors                         FROM 'actors_movies.csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
+\COPY cal2.import_directors                             FROM 'directors.csv'                        WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
+\COPY cal2.import_movies_reviews                        FROM 'movie_reviews.csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
+\COPY cal2.import_movies_directors                      FROM 'movies_directors.csv'                 WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
+\COPY cal2.import_movies                                FROM 'std_movies.csv'                       WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
+\COPY cal2.import_movies_medias                         FROM 'movies_medias.csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
 
 
 
-ROLLBACK;
+
+
 
 \echo 'create and populate table person from actors & directors'
 
@@ -209,9 +211,9 @@ CREATE TABLE IF NOT EXISTS cal2.movies_genres(
     ,title              TEXT            NOT NULL
     ,genre              TEXT            NOT NULL
     ,CONSTRAINT movies_genres_pk PRIMARY KEY (year, title, genre)
-    ,CONSTRAINT movies_genres_movies_fk FOREIGN KEY (year, title) 
+    ,CONSTRAINT movies_fk FOREIGN KEY (year, title) 
         REFERENCES cal2.movies (year, title)
-        MATHC FULL ON DELETE RESTRICT ON UPDATE CASCADE
+        MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
 INSERT INTO cal2.movies_genres(year, title, genre)
@@ -274,6 +276,9 @@ SELECT
 
 
 ROLLBACK;
+
+
+
 
 
 
