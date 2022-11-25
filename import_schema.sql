@@ -236,14 +236,14 @@ CREATE TABLE IF NOT EXISTS cal2.website (
 INSERT INTO cal2.website(url, type)
 SELECT
     DISTINCT
-    substring(webpage, '(https://[\/_\.a-z]+)\/' || replace(lower(author), ' ', '_'))      AS url
-    , 'forum'                                                                              AS type
+    substring(webpage, '(https://[\/_\.a-z]+)\/.*' || replace(lower(author), ' ', '_'))     AS url
+    , 'forum'                                                                               AS type
     FROM cal2.import_movies_reviews
 UNION ALL
 SELECT
     DISTINCT
-    substring(url, '(https://[\/_\.a-z]+\/assets)')                                        AS url
-    , 'gallery'                                                                            AS type
+    substring(url, '(https://[\/_\.a-z]+\/assets.*)')                                       AS url
+    , 'gallery'                                                                             AS type
     FROM cal2.import_movies_medias;
 
 \echo 'create & populate reviews'
@@ -269,7 +269,7 @@ SELECT
     , author                                                                                                AS author
     , content                                                                                               AS content
     , hash                                                                                                  AS hash
-    ,substring(webpage, '(https://[\/_\.a-z]+)\/') || replace(lower(author), ' ', '_')                      AS site
+    ,substring(webpage, '(https://[\/_\.a-z]+)\/.*') || replace(lower(author), ' ', '_')                      AS site
     FROM cal2.import_movies_reviews
         JOIN cal2.movies ON import_movies_reviews.year = movies.year AND import_movies_reviews.title = movies.title
         ;
