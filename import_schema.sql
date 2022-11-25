@@ -207,9 +207,9 @@ SELECT
 
 \echo 'create & populate genres'
 CREATE TABLE IF NOT EXISTS cal2.movies_genres(
-    year                TEXT            NOT NULL
-    ,title              TEXT            NOT NULL
-    ,genre              TEXT            NOT NULL
+    year                INTEGER            NOT NULL
+    ,title              TEXT               NOT NULL
+    ,genre              TEXT               NOT NULL
     ,CONSTRAINT movies_genres_pk PRIMARY KEY (year, title, genre)
     ,CONSTRAINT movies_fk FOREIGN KEY (year, title) 
         REFERENCES cal2.movies (year, title)
@@ -238,7 +238,7 @@ SELECT
     DISTINCT
     substring(webpage, '(https://[\/_\.a-z]+)\/' || replace(lower(author), ' ', '_'))      AS url
     , 'forum'                                                                              AS type
-    FROM cal2.improt_movies_reviews
+    FROM cal2.import_movies_reviews
 UNION ALL
 SELECT
     DISTINCT
