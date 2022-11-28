@@ -192,10 +192,10 @@ The percentage of the NULL values in each column is presented.
 The number of rows in the columns Containing NULL value is also shown. 
 */
 
-ROLLBACK;
 
 
-/*
+
+
 
 
 
@@ -208,8 +208,6 @@ CREATE TABLE IF NOT EXISTS cal2.people(
     ,birthday       DATE
     ,CONSTRAINT people_pk PRIMARY KEY (full_name)
 );
-
-SELECT count(*) FROM cal2.people;
 
 INSERT INTO cal2.people (full_name, coutry, birthday)
 SELECT
@@ -227,6 +225,9 @@ SELECT
     FROM cal2.import_actors
 ON CONFLICT DO NOTHING;
 
+SELECT count(*) FROM cal2.people;
+\echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 
 \echo 'create & populate table directors'
 CREATE TABLE IF NOT EXISTS cal2.directors(
@@ -244,6 +245,10 @@ SELECT
     ,full_name          AS person
     FROM cal2.import_directors
         JOIN cal2.people ON name = full_name;
+
+SELECT count(*) FROM cal2.directors;
+\echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 
 \echo 'create & populate actors'
 CREATE TABLE IF NOT EXISTS cal2.actors(
@@ -263,6 +268,9 @@ SELECT
     FROM cal2.import_actors
         JOIN cal2.people ON name = full_name;
 
+SELECT count(*) FROM cal2.actors;
+\echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 \echo 'create & populate movies'
 CREATE TABLE IF NOT EXISTS cal2.movies(
     year                INTEGER             NOT NULL
@@ -289,6 +297,9 @@ SELECT
         LEFT JOIN cal2.import_directors ID         ON ID.name = IMD.name
         ;
 
+SELECT count(*) FROM cal2.movies;
+\echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 \echo 'create & populate movies_actors'
 CREATE TABLE IF NOT EXISTS cal2.movies_actors(
     year                INTEGER         NOT NULL
@@ -311,6 +322,9 @@ SELECT
         JOIN cal2.movies M ON IMA.title = M.title AND (IMA.year :: INTEGER) = M.year
         ;
 
+SELECT count(*) FROM cal2.movies_actors;
+\echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 \echo 'create & populate genres'
 CREATE TABLE IF NOT EXISTS cal2.movies_genres(
     year                INTEGER            NOT NULL
@@ -332,6 +346,9 @@ SELECT
         JOIN cal2.movies ON (import_movies.year :: INTEGER) = movies.year AND import_movies.title = movies.title
         ;
 
+SELECT count(*) FROM cal2.movies_genres;
+\echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 \echo 'create & populate website from media & review'
 CREATE TABLE IF NOT EXISTS cal2.website (
     url                 TEXT        NOT NULL
@@ -352,6 +369,10 @@ SELECT
     , 'gallery'                                                                             AS type
     FROM cal2.import_movies_medias;
 
+
+SELECT count(*) FROM cal2.website;
+\echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 \echo 'create & populate reviews'
 CREATE TABLE IF NOT EXISTS cal2.reviews (
     year                    INTEGER         NOT NULL
@@ -380,12 +401,12 @@ SELECT
         JOIN cal2.movies ON import_movies_reviews.year = movies.year AND import_movies_reviews.title = movies.title
         ;
 
-
+SELECT count(*) FROM cal2.reviews;
 ROLLBACK;
 
 
 
 
 
-*/
+
 
