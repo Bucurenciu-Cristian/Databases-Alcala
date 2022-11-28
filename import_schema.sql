@@ -91,7 +91,111 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_medias(
 \COPY cal2.import_movies                                FROM 'std_movies.csv'                       WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
 \COPY cal2.import_movies_medias                         FROM 'movies_medias.csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
 
+/*
+Using a simple bash code we count the rows in the csv files. then we comaper them to the number of rows in the imported table. the numbers has to match to ensure that all data has been copied.
+Bash code: pc ~ % cat filename.csv | wc -l 
+then the number minues one to obtain all the rows with out the header. 
+the calculated number is printed after the description which table's rows is being counted. 
+*/
 
+
+\echo 'number of rows in the imported table of import_actors:'
+\echo 'number of rows in the csv file: 997'
+SELECT count(*) FROM cal2.import_actors;
+\echo 'calculate the percentage of null values in the column'
+SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN birthday IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS birthdaypercent FROM cal2.import_actors;
+\echo 'calculate number of rows in column = birthday has the value of NULL'
+SELECT count(*) FROM cal2.import_actors WHERE birthday IS NULL;
+\echo '----------------------------------------------------------------------------'
+
+\echo 'number of rows in the imported table of import_movies_actors:'
+\echo 'number of rows in the csv file: 210'
+SELECT count(*) FROM cal2.import_movies_actors;
+--SELECT count(*) FROM cal2.import_movies_actors WHERE "name" || "year" || "title" IS NULL;
+\echo 'calculate the percentage of null values in the column'
+SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent FROM cal2.import_movies_actors;
+\echo 'calculate number of rows in column = name has the value of NULL'
+SELECT count(*) FROM cal2.import_movies_actors WHERE name IS NULL;
+\echo '----------------------------------------------------------------------------'
+
+
+\echo 'number of rows in the imported table of import_directors:'
+\echo 'number of rows in the csv file: 560'
+SELECT count(*) FROM cal2.import_directors;
+--SELECT count(*) FROM cal2.import_directors WHERE "name" || "birthday" IS NULL;
+\echo 'calculate the percentage of null values in the column'
+SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN birthday IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS birthdaypercent FROM cal2.import_directors;
+\echo 'calculate number of rows in column = birthday has the value of NULL'
+SELECT count(*) FROM cal2.import_directors WHERE birthday IS NULL;
+\echo '----------------------------------------------------------------------------'
+
+
+
+\echo 'number of rows in the imported table of import_movies_reviews:'
+\echo 'number of rows in the csv file: 1129'
+SELECT count(*) FROM cal2.import_movies_reviews;
+--SELECT count(*) FROM cal2.import_actors WHERE "year" || "title" || "rating" || "hash" || "content" || "webpage" || "author" IS NULL;
+\echo 'calculate the percentage of null values in the column'
+SELECT 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent, 100.0 * SUM(CASE WHEN title IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS titlepercent, 100.0 * SUM(CASE WHEN rating IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS ratingpercent, 100.0 * SUM(CASE WHEN hash IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS hashpercent, 100.0 * SUM(CASE WHEN content IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS contentpercent, 100.0 * SUM(CASE WHEN webpage IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS webpagepercent, 100.0 * SUM(CASE WHEN author IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS authorpercent  FROM cal2.import_movies_reviews;
+\echo 'there is no NULL value in this table'
+--\echo 'calculate number of rows in column = birthday has the value of NULL'
+--SELECT count(*) FROM cal2.import_directors WHERE birthday IS NULL;
+\echo '----------------------------------------------------------------------------'
+
+
+
+\echo 'number of rows in the imported table of import_movies_directors:'
+\echo 'number of rows in the csv file: 147'
+SELECT count(*) FROM cal2.import_movies_directors;
+--SELECT count(*) FROM cal2.import_actors WHERE "movie" || "year" || "name" IS NULL;
+\echo 'calculate the percentage of null values in the column'
+SELECT 100.0 * SUM(CASE WHEN movie IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS moviepercent, 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent, 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent FROM cal2.import_movies_directors;
+\echo 'calculate number of rows in column = name has the value of NULL'
+SELECT count(*) FROM cal2.import_movies_directors WHERE name IS NULL;
+\echo '----------------------------------------------------------------------------'
+
+
+
+
+
+\echo 'number of rows in the imported table of import_movies:'
+\echo 'number of rows in the csv file: 1129'
+SELECT count(*) FROM cal2.import_movies;
+--SELECT count(*) FROM cal2.import_actors WHERE "year" || "title" || "genres" || "rating" || "runtime" || "language" || "mpa_rating" IS NULL;
+\echo 'calculate the percentage of null values in the column'
+SELECT 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent, 100.0 * SUM(CASE WHEN title IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS titlepercent, 100.0 * SUM(CASE WHEN genres IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS genrespercent, 100.0 * SUM(CASE WHEN rating IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS ratingpercent, 100.0 * SUM(CASE WHEN runtime IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS runtimepercent, 100.0 * SUM(CASE WHEN language IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS languagepercent, 100.0 * SUM(CASE WHEN mpa_rating IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS mpa_ratingpercent FROM cal2.import_movies;
+\echo 'calculate number of rows in column = mpa_rating has the value of NULL'
+SELECT count(*) FROM cal2.import_movies WHERE mpa_rating IS NULL;
+\echo '----------------------------------------------------------------------------'
+
+
+
+
+
+\echo 'number of rows in the imported table of import_movies_medias:'
+\echo 'number of rows in the csv file: 1109'
+SELECT count(*) FROM cal2.import_movies_medias;
+--SELECT count(*) FROM cal2.import_actors WHERE "year" || "title" || "type" || "url" || "size" IS NULL;
+\echo 'calculate the percentage of null values in the column'
+SELECT 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent, 100.0 * SUM(CASE WHEN title IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS titlepercent, 100.0 * SUM(CASE WHEN type IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS typepercent, 100.0 * SUM(CASE WHEN url IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS urlpercent, 100.0 * SUM(CASE WHEN size IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS sizepercent FROM cal2.import_movies_medias;
+\echo 'table does not contain NULL value'
+--\echo 'calculate number of rows in column = name has the value of NULL'
+--SELECT count(*) FROM cal2.import_movies_actors WHERE name IS NULL;
+\echo '----------------------------------------------------------------------------'
+
+
+
+
+/*
+As all the data has been copied successfully. Final tables are going to be made. 
+The percentage of the NULL values in each column is presented.
+The number of rows in the columns Containing NULL value is also shown. 
+*/
+
+ROLLBACK;
+
+
+/*
 
 
 
@@ -104,6 +208,8 @@ CREATE TABLE IF NOT EXISTS cal2.people(
     ,birthday       DATE
     ,CONSTRAINT people_pk PRIMARY KEY (full_name)
 );
+
+SELECT count(*) FROM cal2.people;
 
 INSERT INTO cal2.people (full_name, coutry, birthday)
 SELECT
@@ -236,7 +342,7 @@ CREATE TABLE IF NOT EXISTS cal2.website (
 INSERT INTO cal2.website(url, type)
 SELECT
     DISTINCT
-    substring(webpage, '(https://[\/_\.a-z]+)\/.*' || replace(lower(author), ' ', '_'))     AS url
+    substring(webpage, '(https://[\/_\.a-z]+)\/' || replace(lower(author), ' ', '_'))     AS url
     , 'forum'                                                                               AS type
     FROM cal2.import_movies_reviews
 UNION ALL
@@ -269,7 +375,7 @@ SELECT
     , author                                                                                                AS author
     , content                                                                                               AS content
     , hash                                                                                                  AS hash
-    ,substring(webpage, '(https://[\/_\.a-z]+)\/.*') || replace(lower(author), ' ', '_')                      AS site
+    ,substring(webpage, '(https://[\/_\.a-z]+)\/') || replace(lower(author), ' ', '_')                      AS site
     FROM cal2.import_movies_reviews
         JOIN cal2.movies ON import_movies_reviews.year = movies.year AND import_movies_reviews.title = movies.title
         ;
@@ -281,4 +387,5 @@ ROLLBACK;
 
 
 
+*/
 
