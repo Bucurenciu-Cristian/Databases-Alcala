@@ -225,7 +225,13 @@ SELECT
     FROM cal2.import_actors
 ON CONFLICT DO NOTHING;
 
-SELECT count(*) FROM cal2.people;
+--SELECT count(*) FROM cal2.people;
+\echo 'Percentage of NULL value in each column (Primary key included == 0.00%)'
+SELECT 100.0 * SUM(CASE WHEN full_name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN coutry IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS countrypercent, 100.0 * SUM(CASE WHEN birthday IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS birthdaypercent FROM cal2.people;
+SELECT count(*) FROM cal2.import_actors;
+SELECT count(*) FROM cal2.import_directors;
+SELECT name FROM cal2.import_actors INTERSECT SELECT name FROM cal2.import_directors;
+\echo 'The table works and there is no missing data as Data_actor + Data_Directors - (Data_actor ∩ Data_director) == rows for Cal2.people'
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 
@@ -246,7 +252,11 @@ SELECT
     FROM cal2.import_directors
         JOIN cal2.people ON name = full_name;
 
-SELECT count(*) FROM cal2.directors;
+--SELECT count(*) FROM cal2.directors;
+SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN person IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS personpersent FROM cal2.directors;
+SELECT count(*) FROM cal2.import_directors;
+SELECT count(*) FROM (SELECT person FROM cal2.directors INTERSECT SELECT full_name FROM cal2.people) I; 
+\echo 'as it can bee seen the intersect all the data from table import_directors has been transfered and checked by its foriegn key with table people and percentage of NULL is also persented as 0% for both columns'
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 
@@ -268,7 +278,11 @@ SELECT
     FROM cal2.import_actors
         JOIN cal2.people ON name = full_name;
 
-SELECT count(*) FROM cal2.actors;
+--SELECT count(*) FROM cal2.actors;
+SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN person IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS personpersent FROM cal2.actors;
+SELECT count(*) FROM cal2.import_actors;
+SELECT count(*) FROM (SELECT person FROM cal2.actors INTERSECT SELECT full_name FROM cal2.people) II;
+\echo 'as it can bee seen the intersect all the data from table import_directors has been transfered and checked by its foriegn key with table people and percentage of NULL is also persented as 0% for both columns'
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo 'create & populate movies'
@@ -296,8 +310,16 @@ SELECT
         LEFT JOIN cal2.import_movies_directors IMD ON IM.year = IMD.year AND IM.title = IMD.movie
         LEFT JOIN cal2.import_directors ID         ON ID.name = IMD.name
         ;
+-- as the left join suggest that the numbers of rows of the table must equal to import_movies. 
 
-SELECT count(*) FROM cal2.movies;
+--SELECT count(*) FROM cal2.movies;
+\echo 'number of rows in the table import_movies:'
+SELECT count(*) FROM cal2.import_movies;
+SELECT 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent, 100.0 * SUM(CASE WHEN title IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS titlepercent, 100.0 * SUM(CASE WHEN runtime IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS runtimepercent, 100.0 * SUM(CASE WHEN language IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS languagepercent, 100.0 * SUM(CASE WHEN mpa_rating IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS mpa_ratingpercent, 100.0 * SUM(CASE WHEN director IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS directorpercent FROM cal2.movies;
+SELECT count(*) FROM (SELECT year, title FROM cal2.import_movies INTERSECT SELECT year, movie FROM cal2.import_movies_directors) III;
+SELECT count(*) FROM (SELECT name FROM cal2.import_directors INTERSECT SELECT name FROM cal2.import_movies_directors) IIII;
+SELECT count(*) FROM (SELECT name)
+--SELECT count(*) FROM (SELECT year FROM cal2.import_movies A LEFT JOIN cal2.import_movies_directors B ON A.year = B.year WHERE B.year IS NULL) IIII;
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo 'create & populate movies_actors'
@@ -322,7 +344,7 @@ SELECT
         JOIN cal2.movies M ON IMA.title = M.title AND (IMA.year :: INTEGER) = M.year
         ;
 
-SELECT count(*) FROM cal2.movies_actors;
+--SELECT count(*) FROM cal2.movies_actors;
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo 'create & populate genres'
@@ -346,7 +368,7 @@ SELECT
         JOIN cal2.movies ON (import_movies.year :: INTEGER) = movies.year AND import_movies.title = movies.title
         ;
 
-SELECT count(*) FROM cal2.movies_genres;
+--SELECT count(*) FROM cal2.movies_genres;
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo 'create & populate website from media & review'
@@ -370,7 +392,7 @@ SELECT
     FROM cal2.import_movies_medias;
 
 
-SELECT count(*) FROM cal2.website;
+--SELECT count(*) FROM cal2.website;
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo 'create & populate reviews'
@@ -401,7 +423,7 @@ SELECT
         JOIN cal2.movies ON import_movies_reviews.year = movies.year AND import_movies_reviews.title = movies.title
         ;
 
-SELECT count(*) FROM cal2.reviews;
+--SELECT count(*) FROM cal2.reviews;
 ROLLBACK;
 
 
