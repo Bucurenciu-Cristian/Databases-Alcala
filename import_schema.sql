@@ -2,9 +2,9 @@
 
 BEGIN;
 
-\echo 'creating schema'
+\echo 'creating schema' 
+CREATE SCHEMA IF NOT EXISTS cal2; --create schema for all our tables are located in same schema like a folder. 
 
-CREATE SCHEMA IF NOT EXISTS cal2;
 
 \echo 'creating interim tables import_*'
 
@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_actors(
     name                     TEXT    NOT NULL
     ,birthday                DATE    
     
-);
+); -- create tables import_actors(name:TEXT, birthday:DATE)
 
 
 
@@ -24,7 +24,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_actors(
     ,title              TEXT        NOT NULL
     ,name               TEXT
     
-);
+); --create table import_movies_actors(year:TEXT, title:TEXT, name:TEXT)
 
 
 
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_directors(
     name                TEXT        NOT NULL
     ,birthday           TEXT
     
-);
+); --create table import_actors(name:TEXT, birthday:TEXT)
 
 
 
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_reviews(
     ,hash               TEXT
     ,webpage            TEXT
     
-);
+); --create table import_movies_reviews(year:INTEGER, title:TEXT, rating:REAL, author:TEXT, content:TEXT, hash:TEXT, webpage:TEXT)
 
 
 
@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_directors(
     ,year               TEXT        NOT NULL
     ,name               TEXT
     
-);
+); --create table import_movies_directors(movie:TEXT, year:TEXT, name:TEXT)
 
 
 
@@ -67,7 +67,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies(
     ,language           TEXT
     ,mpa_rating         TEXT
     
-);
+); --create table import_movies(year:TEXT, title:TEXT, genres:TEXT, rating:TEXT, runtime:TEXT, language:TEXT, mpa_rating:TEXT)
 
 
 
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_medias(
     ,url                TEXT        NOT NULL
     ,size               TEXT        NOT NULL
     
-);
+); --create table import_movies_medias(year:TEXT, title:TEXT, type:TEXT, url:TEXT, size:TEXT)
 
 
 \echo 'Bulk loading data into import_* tables'
@@ -91,6 +91,8 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_medias(
 \COPY cal2.import_movies                                FROM 'std_movies.csv'                       WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
 \COPY cal2.import_movies_medias                         FROM 'movies_medias.csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
 
+--the \Copy above copies all the data from the CSV file to the tables that has been created above to be transfered to the final tables below. 
+
 /*
 Using a simple bash code we count the rows in the csv files. then we comaper them to the number of rows in the imported table. the numbers has to match to ensure that all data has been copied.
 Bash code: pc ~ % cat filename.csv | wc -l 
@@ -101,12 +103,15 @@ the calculated number is printed after the description which table's rows is bei
 
 \echo 'number of rows in the imported table of import_actors:'
 \echo 'number of rows in the csv file: 997'
-SELECT count(*) FROM cal2.import_actors;
+SELECT count(*) FROM cal2.import_actors; --count the rows from the table import_actors()
 \echo 'calculate the percentage of null values in the column'
-SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN birthday IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS birthdaypercent FROM cal2.import_actors;
+SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN birthday IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS birthdaypercent FROM cal2.import_actors; --coutn the percentage of NULL values in each columns
 \echo 'calculate number of rows in column = birthday has the value of NULL'
-SELECT count(*) FROM cal2.import_actors WHERE birthday IS NULL;
+SELECT count(*) FROM cal2.import_actors WHERE birthday IS NULL; --calcualte how many null values is there
 \echo '----------------------------------------------------------------------------'
+
+-- same pattern above will be follow through every table to gather more and necessary information for future checking and constrains.
+
 
 \echo 'number of rows in the imported table of import_movies_actors:'
 \echo 'number of rows in the csv file: 210'
