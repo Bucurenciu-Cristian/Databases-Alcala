@@ -1,10 +1,11 @@
+--this is the finnal version
 --\pset pager off
 
 BEGIN;
 
-\echo 'creating schema' 
-CREATE SCHEMA IF NOT EXISTS cal2; --create schema for all our tables are located in same schema like a folder. 
+\echo 'creating schema'
 
+CREATE SCHEMA IF NOT EXISTS cal2;
 
 \echo 'creating interim tables import_*'
 
@@ -15,7 +16,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_actors(
     name                     TEXT    NOT NULL
     ,birthday                DATE    
     
-); -- create tables import_actors(name:TEXT, birthday:DATE)
+);
 
 
 
@@ -24,7 +25,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_actors(
     ,title              TEXT        NOT NULL
     ,name               TEXT
     
-); --create table import_movies_actors(year:TEXT, title:TEXT, name:TEXT)
+);
 
 
 
@@ -32,7 +33,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_directors(
     name                TEXT        NOT NULL
     ,birthday           TEXT
     
-); --create table import_actors(name:TEXT, birthday:TEXT)
+);
 
 
 
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_reviews(
     ,hash               TEXT
     ,webpage            TEXT
     
-); --create table import_movies_reviews(year:INTEGER, title:TEXT, rating:REAL, author:TEXT, content:TEXT, hash:TEXT, webpage:TEXT)
+);
 
 
 
@@ -54,7 +55,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_directors(
     ,year               TEXT        NOT NULL
     ,name               TEXT
     
-); --create table import_movies_directors(movie:TEXT, year:TEXT, name:TEXT)
+);
 
 
 
@@ -67,7 +68,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies(
     ,language           TEXT
     ,mpa_rating         TEXT
     
-); --create table import_movies(year:TEXT, title:TEXT, genres:TEXT, rating:TEXT, runtime:TEXT, language:TEXT, mpa_rating:TEXT)
+);
 
 
 
@@ -78,7 +79,7 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_medias(
     ,url                TEXT        NOT NULL
     ,size               TEXT        NOT NULL
     
-); --create table import_movies_medias(year:TEXT, title:TEXT, type:TEXT, url:TEXT, size:TEXT)
+);
 
 
 \echo 'Bulk loading data into import_* tables'
@@ -91,8 +92,6 @@ CREATE TABLE IF NOT EXISTS cal2.import_movies_medias(
 \COPY cal2.import_movies                                FROM 'std_movies.csv'                       WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
 \COPY cal2.import_movies_medias                         FROM 'movies_medias.csv'                    WITH (FORMAT csv, HEADER, DELIMITER E'\t', NULL 'NULL', ENCODING 'UTF-8');
 
---the \Copy above copies all the data from the CSV file to the tables that has been created above to be transfered to the final tables below. 
-
 /*
 Using a simple bash code we count the rows in the csv files. then we comaper them to the number of rows in the imported table. the numbers has to match to ensure that all data has been copied.
 Bash code: pc ~ % cat filename.csv | wc -l 
@@ -103,15 +102,12 @@ the calculated number is printed after the description which table's rows is bei
 
 \echo 'number of rows in the imported table of import_actors:'
 \echo 'number of rows in the csv file: 997'
-SELECT count(*) FROM cal2.import_actors; --count the rows from the table import_actors()
+SELECT count(*) FROM cal2.import_actors;
 \echo 'calculate the percentage of null values in the column'
-SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN birthday IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS birthdaypercent FROM cal2.import_actors; --coutn the percentage of NULL values in each columns
+SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namepercent, 100.0 * SUM(CASE WHEN birthday IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS birthdaypercent FROM cal2.import_actors;
 \echo 'calculate number of rows in column = birthday has the value of NULL'
-SELECT count(*) FROM cal2.import_actors WHERE birthday IS NULL; --calcualte how many null values is there
+SELECT count(*) FROM cal2.import_actors WHERE birthday IS NULL;
 \echo '----------------------------------------------------------------------------'
-
--- same pattern above will be follow through every table to gather more and necessary information for future checking and constrains.
-
 
 \echo 'number of rows in the imported table of import_movies_actors:'
 \echo 'number of rows in the csv file: 210'
@@ -239,6 +235,7 @@ SELECT name FROM cal2.import_actors INTERSECT SELECT name FROM cal2.import_direc
 \echo 'The table works and there is no missing data as Data_actor + Data_Directors - (Data_actor ∩ Data_director) == rows for Cal2.people'
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 
 \echo 'create & populate table directors'
 CREATE TABLE IF NOT EXISTS cal2.directors(
@@ -262,6 +259,7 @@ SELECT 100.0 * SUM(CASE WHEN name IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS namep
 SELECT count(*) FROM cal2.import_directors;
 SELECT count(*) FROM (SELECT person FROM cal2.directors INTERSECT SELECT full_name FROM cal2.people) I; 
 \echo 'as it can bee seen the intersect all the data from table import_directors has been transfered and checked by its foriegn key with table people and percentage of NULL is also persented as 0% for both columns'
+\echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 
@@ -290,6 +288,7 @@ SELECT count(*) FROM (SELECT person FROM cal2.actors INTERSECT SELECT full_name 
 \echo 'as it can bee seen the intersect all the data from table import_directors has been transfered and checked by its foriegn key with table people and percentage of NULL is also persented as 0% for both columns'
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
+\echo '---------------------------------------------------------------'
 \echo 'create & populate movies'
 CREATE TABLE IF NOT EXISTS cal2.movies(
     year                INTEGER             NOT NULL
@@ -305,17 +304,16 @@ CREATE TABLE IF NOT EXISTS cal2.movies(
 INSERT INTO cal2.movies(year, title, runtime, language, mpa_rating, director)
 SELECT
     DISTINCT ON (IM.year, IM.title)
-    IM.year :: INTEGER                       AS year
-    ,IM.title                                AS title
+    IM.year :: INTEGER
+    ,IM.title
     ,substring(IM.runtime, '\d+') :: INTEGER AS runtime
-    ,IM.language                             AS language
-    ,IM.mpa_rating                           AS mpa_rating
-    ,ID.name                                 AS director
+    ,IM.language
+    ,IM.mpa_rating
+    ,ID.name
     FROM cal2.import_movies IM
         LEFT JOIN cal2.import_movies_directors IMD ON IM.year = IMD.year AND IM.title = IMD.movie
         LEFT JOIN cal2.import_directors ID         ON ID.name = IMD.name
         ;
--- as the left join suggest that the numbers of rows of the table must equal to import_movies. 
 
 --SELECT count(*) FROM cal2.movies;
 \echo 'number of rows in the table import_movies:'
@@ -323,8 +321,9 @@ SELECT count(*) FROM cal2.import_movies;
 SELECT 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent, 100.0 * SUM(CASE WHEN title IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS titlepercent, 100.0 * SUM(CASE WHEN runtime IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS runtimepercent, 100.0 * SUM(CASE WHEN language IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS languagepercent, 100.0 * SUM(CASE WHEN mpa_rating IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS mpa_ratingpercent, 100.0 * SUM(CASE WHEN director IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS directorpercent FROM cal2.movies;
 SELECT count(*) FROM (SELECT year, title FROM cal2.import_movies INTERSECT SELECT year, movie FROM cal2.import_movies_directors) III;
 SELECT count(*) FROM (SELECT name FROM cal2.import_directors INTERSECT SELECT name FROM cal2.import_movies_directors) IIII;
---SELECT count(*) FROM (SELECT name)
+--SELECT count(*) FROM (SELECT name);
 --SELECT count(*) FROM (SELECT year FROM cal2.import_movies A LEFT JOIN cal2.import_movies_directors B ON A.year = B.year WHERE B.year IS NULL) IIII;
+\echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo 'create & populate movies_actors'
@@ -341,15 +340,15 @@ CREATE TABLE IF NOT EXISTS cal2.movies_actors(
 INSERT INTO cal2.movies_actors(year, title, actor)
 SELECT
     DISTINCT ON (IMA.year, IMA.title)
-    IMA.year :: INTEGER                  AS year
-    ,IMA.title                           AS title
-    ,IMA.name                            AS actor
+    IMA.year :: INTEGER
+    ,IMA.title
+    ,IMA.name
     FROM cal2.import_movies_actors IMA
         JOIN cal2.actors A ON IMA.name = A.name
         JOIN cal2.movies M ON IMA.title = M.title AND (IMA.year :: INTEGER) = M.year
         ;
 
---SELECT count(*) FROM cal2.movies_actors;
+SELECT count(*) FROM cal2.movies_actors;
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo 'create & populate genres'
@@ -383,10 +382,10 @@ CREATE TABLE IF NOT EXISTS cal2.website (
     ,CONSTRAINT website_pk PRIMARY KEY (url)
 );
 
---INSERT INTO cal2.website(url, type)
+INSERT INTO cal2.website(url, type)
 SELECT
     DISTINCT
-    substring(webpage, '(https://[\/_\.a-z]+)\/' || replace(lower(author), ' ', '_'))       AS url
+    substring(webpage, '(https://[\/_\.a-z]+)\/' || replace(lower(author), ' ', '_'))     AS url
     , 'forum'                                                                               AS type
     FROM cal2.import_movies_reviews
 UNION ALL
@@ -397,7 +396,6 @@ SELECT
     FROM cal2.import_movies_medias;
 
 
-/*
 --SELECT count(*) FROM cal2.website;
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
@@ -416,7 +414,8 @@ CREATE TABLE IF NOT EXISTS cal2.reviews (
 
 );
 
---INSERT INTO cal2.reviews (year, title, rating, author, content, hash, site)
+
+INSERT INTO cal2.reviews (year, title, rating, author, content, hash, site)
 SELECT
     import_movies_reviews.year                                                                              AS year
     , import_movies_reviews.title                                                                           AS title
@@ -424,28 +423,15 @@ SELECT
     , author                                                                                                AS author
     , content                                                                                               AS content
     , hash                                                                                                  AS hash
-    ,substring(webpage, '(https://[\/_\.a-z]+)\/') || replace(lower(author), ' ', '_')                      AS site
+    ,substring(webpage, '(https://[\/_\.a-z]+)\/' || replace(lower(author), ' ', '_'))                      AS site
     FROM cal2.import_movies_reviews
         JOIN cal2.movies ON import_movies_reviews.year = movies.year AND import_movies_reviews.title = movies.title
         ;
 
---SELECT count(*) FROM cal2.reviews;
+SELECT count(*) FROM cal2.reviews;
 
-*/
+
 
 ROLLBACK;
---count the distinct ones in the primary key 
--- create new model and specifiying exactly what has changed and why 
--- check th4e final tables rows with the import one 
--- check what is missing and why 
--- duplicate or differernt set of character 
---to fix errors cooment the insert and choose the select to seee whats wrong. 
---learn about anti join.
--- first we have the schema creation, temprary table, final schema 
--- ETL --> extract & trannsfer & loads
-
-
-
-
 
 
