@@ -340,19 +340,21 @@ SELECT
         ;
 
 --SELECT count(*) FROM cal2.movies;
+-- here there is more thann necessary data to check everything is going alright as you can see them by uncomenting it.
 \echo 'number of rows in the table import_movies:'
 SELECT count(*) FROM cal2.import_movies;
 \echo 'show the percentage of NULL values in each columns'
 SELECT 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent, 100.0 * SUM(CASE WHEN title IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS titlepercent, 100.0 * SUM(CASE WHEN runtime IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS runtimepercent, 100.0 * SUM(CASE WHEN language IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS languagepercent, 100.0 * SUM(CASE WHEN mpa_rating IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS mpa_ratingpercent, 100.0 * SUM(CASE WHEN director IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS directorpercent FROM cal2.movies;
-\echo 'shows the number of rows in common on year and title between the tables import_movies and import_movies_directors'
-SELECT count(*) FROM (SELECT year, title FROM cal2.import_movies INTERSECT SELECT year, movie FROM cal2.import_movies_directors) III;
-\echo 'number of row in table import_movies that are not in the import_movies_directors ---> 979 just by uncommentinng the commneted code below'
+--\echo 'shows the number of rows in common on year and title between the tables import_movies and import_movies_directors'
+--SELECT count(*) FROM (SELECT year, title FROM cal2.import_movies INTERSECT SELECT year, movie FROM cal2.import_movies_directors) III;
+--\echo 'number of row in table import_movies that are not in the import_movies_directors ---> 979 just by uncommentinng the commneted code below'
 --SELECT import_movies.year, import_movies.title FROM cal2.import_movies EXCEPT SELECT import_movies_directors.year, import_movies_directors.movie FROM cal2.import_movies_directors;
-\echo 'number of rows in common on name between the tables import_director & import_movies_directors'
-SELECT count(*) FROM (SELECT name FROM cal2.import_directors INTERSECT SELECT name FROM cal2.import_movies_directors) IIII; -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------hrer i neeed to figure out the way to justify the usage of the left joint on tables IM and ID wtf is happeninnggggggg----------------------------------------
-\echo 'count the doubles in the table import_movies'
+--\echo 'number of rows in common on name between the tables import_director & import_movies_directors'
+--SELECT count(*) FROM (SELECT name FROM cal2.import_directors INTERSECT SELECT name FROM cal2.import_movies_directors) IIII;
+\echo 'show the number of doubles in the table import_movies'
 SELECT title, year, COUNT(year), COUNT(title) FROM cal2.import_movies GROUP BY title, year HAVING COUNT(title) > 1 AND COUNT(year) > 1; --count doubles
-\echo 'as it is shown Adding the 147 rows in common with table import_movies_director to the 979 rows of that are table import_movies and not in the import_movies_directors adds up to 1126 which is 3 less the import_movies row count which after taking to account that import_movies had 3 doubles we can conclude that the left join is fully operational between the table import_movies and import_movies_directors'
+\echo 'as it can be seen as it is left join we add the new column infos to the table movies while recieving its data from the table import_movies therefore no data has been lost'
+--\echo 'as it is shown Adding the 147 rows in common with table import_movies_director to the 979 rows of that are table import_movies and not in the import_movies_directors adds up to 1126 which is 3 less the import_movies row count which after taking to account that import_movies had 3 doubles we can conclude that the left join is fully operational between the table import_movies and import_movies_directors'
 --SELECT count(*) FROM (SELECT name);
 --SELECT count(*) FROM (SELECT year FROM cal2.import_movies A LEFT JOIN cal2.import_movies_directors B ON A.year = B.year WHERE B.year IS NULL) IIII;
 \echo '---------------------------------------------------------------'
@@ -385,25 +387,35 @@ SELECT
 
 \echo 'Percentage of NULL value in each column (Primary key included == 0.00%)'
 SELECT 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearpercent, 100.0 * SUM(CASE WHEN title IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS titlepercent, 100.0 * SUM(CASE WHEN actor IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS actorpercent FROM cal2.movies_actors;
-\echo 'number of rows in the import_movies_actors'
-SELECT count(*) FROM cal2.import_movies_actors;
-/*
-\echo 'number of rows in common between movies_actor and actors on name'
-SELECT actor FROM cal2.movies_actors INTERSECT SELECT name FROM cal2.actors;
-\echo 'nnumber of rows that are in import_movies_actor and not in actors on name'
-SELECT import_movies_actors.name FROM cal2.import_movies_actors EXCEPT SELECT actors.name FROM cal2.actors;
-\echo 'number of doubles in the table import_movies_actors'
-SELECT name, COUNT(name) FROM cal2.import_movies_actors GROUP BY name HAVING COUNT(name) > 1; --count doubles
-\echo 'number of rows in common with the table import_movies_actors and movies based on YEAR????????? and title ---> 144'
---SELECT title FROM cal2.import_movies_actors INTERSECT SELECT title FROM cal2.movies;
+--\echo 'number of rows in the import_movies_actors'
+--SELECT count(*) FROM cal2.import_movies_actors;
+
+SELECT
+    DISTINCT ON (IMA.year, IMA.title)
+    IMA.year :: INTEGER                                 AS year
+    ,IMA.title                                          AS title
+    FROM cal2.import_movies_actors IMA
+        JOIN cal2.movies M ON IMA.title = M.title AND (IMA.year :: INTEGER) = M.year
+        
+EXCEPT
+SELECT
+    DISTINCT ON (year, title) 
+    year
+    ,title 
+    FROM cal2.movies_actors;
 
 
-*/
+\echo 'number of distinct year and title in the table import_movies_actors ---> 147'
+--SELECT DISTINCT  year, title FROM cal2.import_movies_actors; -- 147 rows
+\echo 'example below shows that there is no actor name for 16 rows of the table import_movies_actors and as name of actor is foreign key for actor and cant be NULL therefore after eliminating the 16 rows from the 147 distinct rows we will have 131 that has been inserted to our table--> talbe works!'
+SELECT name FROM cal2.import_movies_actors WHERE year = '1195' AND title = 'Congo';
 
 
 
 
---SELECT count(*) FROM cal2.movies_actors;
+
+
+
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
 \echo '---------------------------------------------------------------'
@@ -526,10 +538,10 @@ SELECT 100.0 * SUM(CASE WHEN year IS NULL THEN 1 ELSE 0 END) / COUNT(*) AS yearp
 SELECT count(*) FROM cal2.import_movies_reviews;
 --\echo 'number of rows in the import_directors'
 --SELECT count(*) FROM cal2.import_directors;
-\echo 'rows in common between import_movies_reviews and table movies ----> 1126'
---SELECT year, title FROM cal2.import_movies_reviews INTERSECT SELECT year, title FROM cal2.movies; --1126
-SELECT title, year, COUNT(year), COUNT(title) FROM cal2.import_movies_reviews GROUP BY title, year HAVING COUNT(title) > 1 AND COUNT(year) > 1; --count doubles
-\echo 'As you can see when we go from imported table to processed table we miss 3 values and as we calculated above that are 3 duplicate values in the imported table which therefore is counted for our loss and in conclusion the table is working'
+\echo 'all the data has been transformed and nothing is missinng as it is join and number of rows are equal further more there is no NULL value therefore all the PK and FK are valid too'
+
+
+
 
 ROLLBACK;
 -- I know some of the checks are not as optimal as they can be so my apologies still finding the way.
