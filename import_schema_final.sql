@@ -539,9 +539,62 @@ SELECT count(*) FROM cal2.import_movies_reviews;
 --\echo 'number of rows in the import_directors'
 --SELECT count(*) FROM cal2.import_directors;
 \echo 'all the data has been transformed and nothing is missinng as it is join and number of rows are equal further more there is no NULL value therefore all the PK and FK are valid too'
+\echo "Start here PART 3"
+\echo "6. Provide the relational expression for all actors born before Dec 31 1980 and also the equivalent SQL expression. Provide also the result from your database."
+\echo "-----------------------------"
+Select *
+FROM cal2.actors as A
+         join cal2.people as B on A.person = B.full_name
+where B.birthday IS NOT NULL
+and birthday < '1980-12-31'::DATE
+LIMIT 20;
 
+;
 
+\echo "7. Show the overall number of movies by genre with most popular genres first."
+-- Here you have doubts, but there are changes that it is working overall.
+Select
+    B.genre,
+    count(A.title) as counting
+from cal2.movies as A
+    natural join cal2.movies_genres as B
+group by B.genre
+order by counting DESC
+limit 10
+;
+\echo "-----------------------------"
+-- This is for sure bad, but it kinda works, we wait feedback for it.
+\echo "8. What movies share the same title but have different year? Provide a SQL code for this query, show them in lexicographical order and finally provide the relational algebra expression."
+Select A.title, count(A.title)
+from cal2.movies as A
+group by A.title
+order by count(A.title) DESC
+limit 4
+;
 
+\echo "-----------------------------"
+\echo "9. Provide the relational algebra for the query showing the best ranked movies (by rating). Provide the SQL query as well and finally show the corresponding results."
+
+Select movies.title, r.rating
+from cal2.movies
+         join cal2.reviews as r on movies.year = r.year and movies.title = r.title
+order by r.rating desc
+limit 10
+;
+
+\echo "-----------------------------"
+\echo "10. Provide the query to show movies having the same average rating and the results."
+\echo "This doesn't work, how can we think about it?"
+
+Select r.rating, count(r.rating), movies.title, count(movies.title)
+from cal2.movies
+--          join cal2.reviews as r on movies.year = r.year and movies.title = r.title
+        natural join cal2.reviews as r
+
+group by r.rating, movies.title
+limit 10
+;
+-- \echo "-----------------------------"
 
 ROLLBACK;
 -- I know some of the checks are not as optimal as they can be so my apologies still finding the way.
