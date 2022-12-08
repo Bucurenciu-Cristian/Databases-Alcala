@@ -586,8 +586,9 @@ SELECT
     GROUP BY title;
 \echo 'Question 5 Show  directors  and  the  movies  they    directed  for  those  people  being also  actors  in  addition to being directors. '
 
-SELECT director FROM cal2.movies WHERE year = 1990 AND title = 'Alice';
-SELECT actor    FROM cal2.movies_actors WHERE year = 1990 AND title = 'Alice';
+SELECT A.name, M.title FROM cal2.actors A
+JOIN cal2.directors D ON A.name = D.name
+JOIN cal2.movies M    ON D.name = M.director;
 
 
 \echo "6. Provide the relational expression for all actors born before Dec 31 1980 and also the equivalent SQL expression. Provide also the result from your database."
@@ -636,27 +637,12 @@ limit 10
 \echo "10. Provide the query to show movies having the same average rating and the results."
 \echo "This doesn't work, how can we think about it?"
 
-Select r.rating, count(r.rating), m.title, count(m.title)
-from cal2.movies m
-join cal2.reviews as r on m.year = r.year and m.title = r.title
-group by r.rating, m.title
-order by r.rating DESC
-limit 10
-;
-SELECT R.rating, count(R.title) FROM cal2.reviews R
-JOIN cal2.movies M ON R.title = M.title AND R.year = M.year
-GROUP BY R.rating 
-ORDER BY R.rating DESC 
-limit 20;
-
-SELECT year, title, rating FROM cal2.reviews 
-WHERE rating IN (
-    SELECT rating FROM cal2.movies
-    GROUP BY rating
-    HAVING count(*) > 1
-)
-ORDER BY rating DESC
+SELECT concat(title), AVG(rating) AS avg_rating
+FROM cal2.reviews
+GROUP BY title
+ORDER BY avg_rating
 limit 10;
+
 -- \echo "-----------------------------"
 
 
