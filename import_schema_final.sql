@@ -582,19 +582,12 @@ SELECT
     title               AS "Movies"
     ,count(*)           AS "Actors & Directors"
     FROM actors_directors 
-    WHERE title = 'The Lord if the Rings: The Return of the King'
+    WHERE title = 'The Lord of the Rings: The Return of the King'
     GROUP BY title;
 \echo 'Question 5 Show  directors  and  the  movies  they    directed  for  those  people  being also  actors  in  addition to being directors. '
-SELECT D.name, M.title FROM cal2.directors D
-JOIN cal2.movies M                      ON D.name = M.director
-JOIN cal2.movies_actors MC              ON M.year = MC.year AND M.title = MC.title
-WHERE M.director = MC.actor;
 
-SELECT P.full_name, M.title FROM cal2.people P
-JOIN cal2.actors A          ON P.full_name = A.person
-JOIN cal2.directors D       ON P.full_name = D.person
-JOIN cal2.movies M          ON D.name = M.director
-JOIN cal2.movies_actors MC  ON A.name = MC.actor;
+SELECT director FROM cal2.movies WHERE year = 1990 AND title = 'Alice';
+SELECT actor    FROM cal2.movies_actors WHERE year = 1990 AND title = 'Alice';
 
 
 \echo "6. Provide the relational expression for all actors born before Dec 31 1980 and also the equivalent SQL expression. Provide also the result from your database."
@@ -643,14 +636,27 @@ limit 10
 \echo "10. Provide the query to show movies having the same average rating and the results."
 \echo "This doesn't work, how can we think about it?"
 
-Select r.rating, count(r.rating), movies.title, count(movies.title)
-from cal2.movies
---          join cal2.reviews as r on movies.year = r.year and movies.title = r.title
-        natural join cal2.reviews as r
-
-group by r.rating, movies.title
+Select r.rating, count(r.rating), m.title, count(m.title)
+from cal2.movies m
+join cal2.reviews as r on m.year = r.year and m.title = r.title
+group by r.rating, m.title
+order by r.rating DESC
 limit 10
 ;
+SELECT R.rating, count(R.title) FROM cal2.reviews R
+JOIN cal2.movies M ON R.title = M.title AND R.year = M.year
+GROUP BY R.rating 
+ORDER BY R.rating DESC 
+limit 20;
+
+SELECT year, title, rating FROM cal2.reviews 
+WHERE rating IN (
+    SELECT rating FROM cal2.movies
+    GROUP BY rating
+    HAVING count(*) > 1
+)
+ORDER BY rating DESC
+limit 10;
 -- \echo "-----------------------------"
 
 
