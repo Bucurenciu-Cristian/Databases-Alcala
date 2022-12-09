@@ -653,6 +653,7 @@ INNER JOIN cal2.actors ON cal2.directors.person = cal2.actors.person;
 
 \echo '6. Provide the relational expression for all actors born before Dec 31 1980 and also the equivalent SQL expression. Provide also the result from your database.'
 \echo '-----------------------------'
+
 /*
 π name (σ birthday<'1980-12-31' (actors ⋈ people))
 
@@ -662,6 +663,13 @@ SELECT name
 FROM cal2.actors
 INNER JOIN cal2.people ON cal2.actors.person = cal2.people.full_name
 WHERE birthday < '1980-12-31';
+
+/*Explanation of the query
+  This is a SQL query that selects the names of actors from a database table called "actors" in a schema called "cal2,"
+  where the actor's birthday is before December 31, 1980. The query uses an inner join to combine the "actors" table
+  with a table called "people" in the "cal2" schema, using the full name of each actor to match the records in the two
+  tables. The resulting table will only include actors who have a birthday that is before December 31, 1980.
+  */
 
 \echo '7. Show the overall number of movies by genre with most popular genres first.'
 /*
@@ -685,6 +693,14 @@ SELECT genre, COUNT(*) as num_movies
 FROM cal2.movies_genres
 GROUP BY genre
 ORDER BY num_movies DESC
+/*Explanation of the query
+This is a SQL query that selects the genres of movies from a database table called "movies_genres" in a schema called
+  "cal2," and then groups them by genre, counting the number of movies in each group. The resulting table is ordered by
+  the number of movies in each genre, with the largest number of movies listed first. The query uses an alias,
+  "num_movies," to give the count of movies in each genre a more readable name.
+*/
+
+
 \echo '-----------------------------'
 \echo '8. What movies share the same title but have different year? Provide a SQL code for this query, show them in lexicographical order and finally provide the relational algebra expression.'
 /*
@@ -704,7 +720,15 @@ FROM cal2.movies
 GROUP BY title
 HAVING MIN(year) < MAX(year)
 ORDER BY title
+/*
+Explanation of the query
+This is a SQL query that selects the titles of movies from a database table called "movies" in a schema called "cal2,"
+and then groups them by title. The query then selects the minimum and maximum year of each movie, and only includes
+movies that have been released in more than one year. The resulting table is ordered by title, and includes the minimum
+and maximum year of each movie that meets the criteria. The query uses aliases, "min_year" and "max_year," to give the
+minimum and maximum years for each movie a more readable name.
 
+*/
 \echo '-----------------------------'
 \echo '9. Provide the relational algebra for the query showing the best ranked movies (by rating). Provide the SQL query as well and finally show the corresponding results.'
 /*
@@ -723,7 +747,13 @@ FROM cal2.movies
 INNER JOIN cal2.reviews ON cal2.reviews.year = cal2.movies.year AND cal2.reviews.title = cal2.movies.title
 GROUP BY cal2.movies.title
 ORDER BY best_rating DESC;
-
+ /*
+ This is a SQL query that selects the titles of movies from a database table called "movies" in a schema called "cal2,"
+ and then finds the maximum rating for each movie. The query uses an inner join to combine the "movies" table with a
+ table called "reviews" in the "cal2" schema, using the year and title of each movie to match the records in the two
+ tables. The resulting table is ordered by the highest rating for each movie, with the movies having the highest ratings
+ listed first. The query uses an alias, "best_rating," to give the maximum rating for each movie a more readable name.
+ */
 
 \echo '-----------------------------'
 \echo '10. Provide the query to show movies having the same average rating and the results.'
@@ -744,6 +774,11 @@ HAVING AVG(rating) IN (SELECT AVG(rating)
                        HAVING COUNT(*) > 1)
 ;
 
+/*
+This SQL query selects the year, title, and average rating of books in a reviews table, grouped by year and title.
+It then filters out results that do not have more than one review by using a HAVING clause with a subquery that returns
+the average ratings of books that have been reviewed more than once.
+*/
 
 rollback;
 -- I know some of the checks are not as optimal as they can be so our apologies still finding the way.
