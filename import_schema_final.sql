@@ -548,16 +548,16 @@ SELECT count(*) FROM cal2.import_movies_reviews;
 \echo 'Question 1 show the number of people who are both actors and directors'
 SELECT full_name FROM cal2.people A                                                                 ---- select full names from poeple which include both actors and directors
 JOIN cal2.actors B ON A.full_name = B.name                                                           ---- inner join or find simlar rows which the name as actor is same in people
-JOIN cal2.directors C ON A.full_name = C.name;                                                        ---- same for directors therefore give intersect of people and actors and directors. 
+JOIN cal2.directors C ON A.full_name = C.name;                                                        ---- same for directors therefore give intersect of people and actors and directors.
 
 \echo 'Question 2 What is the overall minute count for all movies in which Tom Cruise is acting? Group the results by genre and provide the SQL code as well.'
 SELECT MG.genre, sum(runtime) AS "Total" FROM cal2.movies_actors MC                                        ---- selecting genre and total min runtim from movies_actor with joinin
-JOIN cal2.movies M          ON  MC.title = M.title  AND MC.year = M.year                                     --- joining talbe movies onn year and title 
+JOIN cal2.movies M          ON  MC.title = M.title  AND MC.year = M.year                                     --- joining talbe movies onn year and title
 JOIN cal2.movies_genres MG  ON  MC.title = MG.title AND MC.year = MG.year                                -- joining table movies_genres on year and title
 WHERE MC.actor = 'Tom Cruise'                                                                            -- where the actors name is TOM CRUISE
-GROUP BY MG.genre;                                                                                       -- group by genres. 
+GROUP BY MG.genre;                                                                                       -- group by genres.
 \echo 'Question 3 Show people acting or directing any Horror movies. Provide the relational expression for your SQL query as well.'
-SELECT P.full_name FROM cal2.people P                                                                    --    
+SELECT P.full_name FROM cal2.people P                                                                    --
 JOIN cal2.actors A                           ON P.full_name = A.person
 JOIN cal2.movies_actors MC                  ON A.name = MC.actor
 JOIN cal2.movies_genres MG                  ON MC.title = MG.title AND MC.year = MG.year
@@ -581,76 +581,123 @@ WITH actors_directors AS (
 SELECT
     title               AS "Movies"
     ,count(*)           AS "Actors & Directors"
-    FROM actors_directors 
+    FROM actors_directors
     WHERE title = 'The Lord of the Rings: The Return of the King'
     GROUP BY title;
 \echo 'Question 5 Show  directors  and  the  movies  they    directed  for  those  people  being also  actors  in  addition to being directors. '
 
+
 SELECT A.name, M.title FROM cal2.actors A
 JOIN cal2.directors D ON A.name = D.name
-JOIN cal2.movies M    ON D.name = M.director;
-
-
-\echo "6. Provide the relational expression for all actors born before Dec 31 1980 and also the equivalent SQL expression. Provide also the result from your database."
-\echo "-----------------------------"
-Select *
-FROM cal2.actors as A
-         join cal2.people as B on A.person = B.full_name
-where B.birthday IS NOT NULL
-and birthday < '1980-12-31'::DATE
-LIMIT 20;
-
+JOIN cal2.movies M    ON D.name = M.director
+JOIN cal2.people P on A.person = P.full_name and D.person = P.full_name
 ;
+/*
+Amir, if you want try this for this question No.5:
 
-\echo "7. Show the overall number of movies by genre with most popular genres first."
--- Here you have doubts, but there are changes that it is working overall.
-Select
-    B.genre,
-    count(A.title) as counting
-from cal2.movies as A
-    natural join cal2.movies_genres as B
-group by B.genre
-order by counting DESC
-limit 10
-;
-\echo "-----------------------------"
--- This is for sure bad, but it kinda works, we wait feedback for it.
-\echo "8. What movies share the same title but have different year? Provide a SQL code for this query, show them in lexicographical order and finally provide the relational algebra expression."
-Select A.title, count(A.title)
-from cal2.movies as A
-group by A.title
-order by count(A.title) DESC
-limit 4
-;
+SELECT cal2.actors.person, title, cal2.directors.name
+FROM cal2.directors
+INNER JOIN cal2.movies ON cal2.directors.name = cal2.movies.director
+INNER JOIN cal2.actors ON cal2.directors.person = cal2.actors.person;
 
-\echo "-----------------------------"
-\echo "9. Provide the relational algebra for the query showing the best ranked movies (by rating). Provide the SQL query as well and finally show the corresponding results."
+*/
 
-Select movies.title, r.rating
-from cal2.movies
-         join cal2.reviews as r on movies.year = r.year and movies.title = r.title
-order by r.rating desc
-limit 10
-;
 
-\echo "-----------------------------"
-\echo "10. Provide the query to show movies having the same average rating and the results."
-\echo "This doesn't work, how can we think about it?"
 
-SELECT concat(title), AVG(rating) AS avg_rating
-FROM cal2.reviews
+\echo '6. Provide the relational expression for all actors born before Dec 31 1980 and also the equivalent SQL expression. Provide also the result from your database.'
+\echo '-----------------------------'
+/*
+π name (σ birthday<'1980-12-31' (actors ⋈ people))
+
+*/
+
+SELECT name
+FROM cal2.actors
+INNER JOIN cal2.people ON cal2.actors.person = cal2.people.full_name
+WHERE birthday < '1980-12-31';
+
+\echo '7. Show the overall number of movies by genre with most popular genres first.'
+/*
+It is a single expression but we've put it like this for better view
+π genre, num_movies (
+  γ genre, count(*) as num_movies (
+    cal2.movies_genres
+  )
+  ⨝ genre (
+    cal2.movies_genres
+  )
+)
+⨝ num_movies (
+  cal2.movies_genres
+)
+
+Single Line, same expression:
+π genre, num_movies (  γ genre, count(*) as num_movies (    cal2.movies_genres  )  ⨝ genre (    cal2.movies_genres  )) ⨝ num_movies (  cal2.movies_genres)
+*/
+SELECT genre, COUNT(*) as num_movies
+FROM cal2.movies_genres
+GROUP BY genre
+ORDER BY num_movies DESC
+\echo '-----------------------------'
+\echo '8. What movies share the same title but have different year? Provide a SQL code for this query, show them in lexicographical order and finally provide the relational algebra expression.'
+/*
+This is relational algebra for the given query from below
+π title, min_year, max_year (
+  γ title, min(year) as min_year, max(year) as max_year (
+    cal2.movies
+  )
+  WHERE min_year < max_year
+)
+⨝ title (
+  cal2.movies
+)
+*/
+SELECT title, MIN(year) as min_year, MAX(year) as max_year
+FROM cal2.movies
 GROUP BY title
-ORDER BY avg_rating
-limit 10;
+HAVING MIN(year) < MAX(year)
+ORDER BY title
 
--- \echo "-----------------------------"
+\echo '-----------------------------'
+\echo '9. Provide the relational algebra for the query showing the best ranked movies (by rating). Provide the SQL query as well and finally show the corresponding results.'
+/*
+The relational algebra for the given query is:
+
+π title, MAX(rating) (σ year=movies.year AND title=movies.title (movies ⋈ reviews))
+
+This expression uses the π (projection) operator to select the title and MAX(rating) columns from the result
+of the join between the movies and reviews tables. The join is performed using the ⋈ (natural join) operator, and
+is restricted using the σ (selection) operator to only include rows where the year and title columns match in both tables.
+The final result is sorted in descending order by the MAX(rating) column.
+*/
+
+SELECT cal2.movies.title, MAX(rating) as best_rating
+FROM cal2.movies
+INNER JOIN cal2.reviews ON cal2.reviews.year = cal2.movies.year AND cal2.reviews.title = cal2.movies.title
+GROUP BY cal2.movies.title
+ORDER BY best_rating DESC;
 
 
+\echo '-----------------------------'
+\echo '10. Provide the query to show movies having the same average rating and the results.'
+\echo 'This is working now'
+/*
+π year, title, AVG(rating) (
+    σ COUNT(*) > 1 (
+        (cal2.reviews ⨝ cal2.reviews) ÷ year, title
+    )
+)
+*/
+SELECT year, title, AVG(rating) as avg_rating
+FROM cal2.reviews
+GROUP BY year, title
+HAVING AVG(rating) IN (SELECT AVG(rating)
+                       FROM cal2.reviews
+                       GROUP BY year, title
+                       HAVING COUNT(*) > 1)
+;
 
 
-
-
-
-ROLLBACK;
+rollback;
 -- I know some of the checks are not as optimal as they can be so my apologies still finding the way.
 
