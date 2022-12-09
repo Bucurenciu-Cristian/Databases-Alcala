@@ -550,12 +550,29 @@ SELECT full_name FROM cal2.people A                                             
 JOIN cal2.actors B ON A.full_name = B.name                                                           ---- inner join or find simlar rows which the name as actor is same in people
 JOIN cal2.directors C ON A.full_name = C.name;                                                        ---- same for directors therefore give intersect of people and actors and directors.
 
+/*
+People --> A 
+Actors --> B
+Directors --> C 
+
+π A.full_name (Actor ⋈<sub>A.full_name = B.name<sub> People ⋈<sub>A.full_name = C.name;<sub> Director)
+*/
+
 \echo 'Question 2 What is the overall minute count for all movies in which Tom Cruise is acting? Group the results by genre and provide the SQL code as well.'
 SELECT MG.genre, sum(runtime) AS "Total" FROM cal2.movies_actors MC                                        ---- selecting genre and total min runtim from movies_actor with joinin
 JOIN cal2.movies M          ON  MC.title = M.title  AND MC.year = M.year                                     --- joining talbe movies onn year and title
 JOIN cal2.movies_genres MG  ON  MC.title = MG.title AND MC.year = MG.year                                -- joining table movies_genres on year and title
 WHERE MC.actor = 'Tom Cruise'                                                                            -- where the actors name is TOM CRUISE
 GROUP BY MG.genre;                                                                                       -- group by genres.
+
+/*
+Movies_Actor --> MC
+movies --> M
+movies_genre --> MG 
+
+(MG.genre G sum(runtime) (σ MC.actor = Tom Cruise (Movies_actor ⋈<sub>MC.title = M.title  AND MC.year = M.year<sub> Movies ⋈<sub><MC.title = MG.title AND MC.year = MG.yearsub> Movies_genres)) 
+*/
+
 \echo 'Question 3 Show people acting or directing any Horror movies. Provide the relational expression for your SQL query as well.'
 SELECT P.full_name FROM cal2.people P                                                                    --
 JOIN cal2.actors A                           ON P.full_name = A.person
@@ -568,6 +585,20 @@ JOIN cal2.directors D                      ON P.full_name = D.person
 JOIN cal2.movies M                         ON D.name = M.director
 JOIN cal2.movies_genres MG                 ON M.title = MG.title AND M.year = MG.year
 WHERE MG.genre = 'Horror';
+/*
+People --> P
+Actors --> A 
+Movies_Actors --> MC
+Movies_genre--> MG
+Directors --> D
+Movies --> M 
+
+π P.full_name (Poeple ⋈<sub>P.full_name = A.person<sub> Actors ⋈<sub>A.name = MC.actor<sub> Movies_Actor ⋈<sub>MC.title = MG.title ∧ MC.year = MG.year<sub> Movies_Genre) 
+∪ 
+π P.full_name (People ⋈<sub>P.full_name = D.person<sub> Directors ⋈<sub>D.name = M.director<sub> Movies ⋈<sub>M.title = MG.title ∧ M.year = MG.year<sub> Movies_Genre)
+
+*/
+
 \echo 'Question 4 How many people, considering actors and directors can you count from the movie "The Lord of the Rings: The Return of the King"?   Show the SQL code.'
 WITH actors_directors AS (
     SELECT P.full_name, MC.title FROM cal2.people P
@@ -584,6 +615,15 @@ SELECT
     FROM actors_directors
     WHERE title = 'The Lord of the Rings: The Return of the King'
     GROUP BY title;
+/*
+People --> p
+Actor --> A 
+movies_actors --> MC 
+movies --> M
+T1 <-- π P.full_name, MC.title (Poeple ⋈<sub>P.full_name = A.person<sub> Actors ⋈<sub>A.name = MC.actor<sub> Movies_Actor) ∪ π P.full_name, M.title (People ⋈<sub>P.full_name = D.person<sub> Directors ⋈<sub>D.name = M.director<sub> Movies)
+ρ movies, Actor_director (title G count(*) (σ title = The Lord of the Ring: The Return of the King (T1)))
+*/
+
 \echo 'Question 5 Show  directors  and  the  movies  they    directed  for  those  people  being also  actors  in  addition to being directors. '
 
 
@@ -593,7 +633,14 @@ JOIN cal2.movies M    ON D.name = M.director
 JOIN cal2.people P on A.person = P.full_name and D.person = P.full_name
 ;
 /*
-Amir, if you want try this for this question No.5:
+actor -> A
+directors -> D
+movies -> M 
+people -> P
+π A.name, M.title (Actors ⋈<sub>A.name = D.name<sub> Directors ⋈<sub>D.name = M.director<sub> Movies ⋈<sub>D.person = P.full_name<sub> People )
+*/
+/*
+Solution number 2:
 
 SELECT cal2.actors.person, title, cal2.directors.name
 FROM cal2.directors
@@ -699,5 +746,5 @@ HAVING AVG(rating) IN (SELECT AVG(rating)
 
 
 rollback;
--- I know some of the checks are not as optimal as they can be so my apologies still finding the way.
+-- I know some of the checks are not as optimal as they can be so our apologies still finding the way.
 
