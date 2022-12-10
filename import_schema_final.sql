@@ -574,17 +574,17 @@ movies_genre --> MG
 */
 
 \echo 'Question 3 Show people acting or directing any Horror movies. Provide the relational expression for your SQL query as well.'
-SELECT P.full_name FROM cal2.people P                                                                    --
-JOIN cal2.actors A                           ON P.full_name = A.person
-JOIN cal2.movies_actors MC                  ON A.name = MC.actor
-JOIN cal2.movies_genres MG                  ON MC.title = MG.title AND MC.year = MG.year
-WHERE MG.genre = 'Horror'
-UNION
-SELECT P.full_name FROM cal2.people P
-JOIN cal2.directors D                      ON P.full_name = D.person
-JOIN cal2.movies M                         ON D.name = M.director
-JOIN cal2.movies_genres MG                 ON M.title = MG.title AND M.year = MG.year
-WHERE MG.genre = 'Horror';
+SELECT P.full_name FROM cal2.people P                                                                    -- selecting full name from people
+JOIN cal2.actors A                           ON P.full_name = A.person                                  --- joininng with Actor on fullname = person 
+JOIN cal2.movies_actors MC                  ON A.name = MC.actor                                        --- joining on MOvies_Actor onn Actor name = Movie_Actor Actor 
+JOIN cal2.movies_genres MG                  ON MC.title = MG.title AND MC.year = MG.year                --- Joining on Movies Genere on the primary keys of movies 
+WHERE MG.genre = 'Horror'                                                                               --- selecting gerne = Horror 
+UNION                                                                                                   -- unnion or adding to 
+SELECT P.full_name FROM cal2.people P                                                                   -- selecting full name from people
+JOIN cal2.directors D                      ON P.full_name = D.person                                    --- joininng with Director on fullname = person 
+JOIN cal2.movies M                         ON D.name = M.director                                       --- JOining with movies table on Director name = Movies Director 
+JOIN cal2.movies_genres MG                 ON M.title = MG.title AND M.year = MG.year                   --- JJoining on Movies Genere on the primary keys of movies
+WHERE MG.genre = 'Horror';                                                                              --- selecting gerne = Horror
 /*
 People --> P
 Actors --> A 
@@ -600,21 +600,21 @@ Movies --> M
 */
 
 \echo 'Question 4 How many people, considering actors and directors can you count from the movie "The Lord of the Rings: The Return of the King"?   Show the SQL code.'
-WITH actors_directors AS (
-    SELECT P.full_name, MC.title FROM cal2.people P
-    JOIN cal2.actors A                              ON P.full_name = A.person
-    JOIN cal2.movies_actors MC                      ON A.name = MC.actor
-    UNION
-    SELECT P.full_name, M.title FROM cal2.people P
-    JOIN cal2.directors D                           ON P.full_name = D.person
-    JOIN cal2.movies    M                           ON D.name = M.director
+WITH actors_directors AS (                                                                                              --- Creating temp table called actors_director filled with 
+    SELECT P.full_name, MC.title FROM cal2.people P                                                                      -- projecting fullname from people & Movies_actor title from table people 
+    JOIN cal2.actors A                              ON P.full_name = A.person                                           --- joining with Actor on fullname = Actor person 
+    JOIN cal2.movies_actors MC                      ON A.name = MC.actor                                                --- joining with movies_actor on Actor name= Movies_actor Actor 
+    UNION                                                                                                               --- UNion or adding to 
+    SELECT P.full_name, M.title FROM cal2.people P                                                                      --- projecting fullname from people & movies title from table people 
+    JOIN cal2.directors D                           ON P.full_name = D.person                                           --- joing with director as fullname = director person 
+    JOIN cal2.movies    M                           ON D.name = M.director                                              --- joining movies on director name = movies directo 
     )
-SELECT
+SELECT                                                                                                                  -- projecting title as movies and count rows as Actor_directors 
     title               AS "Movies"
     ,count(*)           AS "Actors & Directors"
-    FROM actors_directors
-    WHERE title = 'The Lord of the Rings: The Return of the King'
-    GROUP BY title;
+    FROM actors_directors                                                                                               -- From the temp table 
+    WHERE title = 'The Lord of the Rings: The Return of the King'                                                       -- selecting the title as The Lord of the Rings: The Return of the King
+    GROUP BY title;                                                                                                     -- grouped by title. 
 /*
 People --> p
 Actor --> A 
@@ -627,10 +627,10 @@ T1 <-- π P.full_name, MC.title (Poeple ⋈<sub>P.full_name = A.person<sub> Acto
 \echo 'Question 5 Show  directors  and  the  movies  they    directed  for  those  people  being also  actors  in  addition to being directors. '
 
 
-SELECT A.name, M.title FROM cal2.actors A
-JOIN cal2.directors D ON A.name = D.name
-JOIN cal2.movies M    ON D.name = M.director
-JOIN cal2.people P on A.person = P.full_name and D.person = P.full_name
+SELECT A.name, M.title FROM cal2.actors A                                                                                -- projecting Actor name and Movies title from actors 
+JOIN cal2.directors D ON A.name = D.name                                                                                --- joining with directors on the actors name = directors name 
+JOIN cal2.movies M    ON D.name = M.director                                                                            --- joining movies with director name = movies director 
+JOIN cal2.people P on A.person = P.full_name and D.person = P.full_name                                                 ---- joining with people on Actor person = fullname and director person = fullname. 
 ;
 /*
 actor -> A
