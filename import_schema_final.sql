@@ -693,6 +693,7 @@ SELECT genre, COUNT(*) as num_movies
 FROM cal2.movies_genres
 GROUP BY genre
 ORDER BY num_movies DESC
+;
 /*Explanation of the query
 This is a SQL query that selects the genres of movies from a database table called "movies_genres" in a schema called
   "cal2," and then groups them by genre, counting the number of movies in each group. The resulting table is ordered by
@@ -720,6 +721,7 @@ FROM cal2.movies
 GROUP BY title
 HAVING MIN(year) < MAX(year)
 ORDER BY title
+;
 /*
 Explanation of the query
 This is a SQL query that selects the titles of movies from a database table called "movies" in a schema called "cal2,"
