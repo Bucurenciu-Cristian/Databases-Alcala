@@ -210,7 +210,7 @@ CREATE TABLE IF NOT EXISTS cal2.people(                                         
     ,CONSTRAINT people_pk PRIMARY KEY (full_name)
 );
 
-INSERT INTO cal2.people (full_name, coutry, birthday)                       --- inserting to this table 
+INSERT INTO cal2.people (full_name, coutry, birthday)                       --- inserting to this table from both table of actor and director 
 SELECT
     DISTINCT 
     name                    AS full_name
@@ -249,7 +249,7 @@ SELECT full_name, COUNT(full_name) FROM cal2.people GROUP BY full_name HAVING CO
 
 
 \echo 'create & populate table directors'
-CREATE TABLE IF NOT EXISTS cal2.directors(
+CREATE TABLE IF NOT EXISTS cal2.directors(                                                                  --- creating a table directors with foreng key to table peole and primary key of name 
     name                TEXT           NOT NULL
     ,person             TEXT           NOT NULL
     ,CONSTRAINT directors_pk PRIMARY KEY (name)
@@ -257,7 +257,7 @@ CREATE TABLE IF NOT EXISTS cal2.directors(
         REFERENCES cal2.people(full_name) MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
-INSERT INTO cal2.directors(name, person)
+INSERT INTO cal2.directors(name, person) ----populating the table. 
 SELECT
     DISTINCT
     name                AS name
@@ -281,7 +281,7 @@ SELECT count(*) FROM (SELECT person FROM cal2.directors INTERSECT SELECT full_na
 
 
 \echo 'create & populate actors'
-CREATE TABLE IF NOT EXISTS cal2.actors(
+CREATE TABLE IF NOT EXISTS cal2.actors(                     -- same thing as mentioned witn directors with actors 
     name            TEXT            NOT NULL
     ,person         TEXT            NOT NULL
     ,CONSTRAINT actors_pk PRIMARY KEY (name)
@@ -314,7 +314,7 @@ SELECT count(*) FROM (SELECT person FROM cal2.actors INTERSECT SELECT full_name 
 
 
 \echo 'create & populate movies'
-CREATE TABLE IF NOT EXISTS cal2.movies(
+CREATE TABLE IF NOT EXISTS cal2.movies(                             --- creating table movies with primary keys of title and year and foriegn key of director related to primary key of table directos. 
     year                INTEGER             NOT NULL
     ,title              TEXT                NOT NULL
     ,runtime            INTEGER             NOT NULL
@@ -325,7 +325,7 @@ CREATE TABLE IF NOT EXISTS cal2.movies(
     ,CONSTRAINT movies_directors_fk FOREIGN KEY (director)
         REFERENCES cal2.directors (name) MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE
 );
-INSERT INTO cal2.movies(year, title, runtime, language, mpa_rating, director)
+INSERT INTO cal2.movies(year, title, runtime, language, mpa_rating, director) --- populatig the table using the imported table joining with table directors. 
 SELECT
     DISTINCT ON (IM.year, IM.title)           
     IM.year :: INTEGER                       AS year                 
@@ -364,17 +364,17 @@ SELECT title, year, COUNT(year), COUNT(title) FROM cal2.import_movies GROUP BY t
 
 
 \echo 'create & populate movies_actors'
-CREATE TABLE IF NOT EXISTS cal2.movies_actors(
-    year                INTEGER         NOT NULL
-    ,title              TEXT            NOT NULL
-    ,actor              TEXT            NOT NULL
+CREATE TABLE IF NOT EXISTS cal2.movies_actors(                                  --- movies_actor is a table to show whihc actors acted in whihc movies showing the many to many relation. 
+    year                INTEGER         NOT NULL                                --- title and year will be foregn key from table movies 
+    ,title              TEXT            NOT NULL                                
+    ,actor              TEXT            NOT NULL                                --- actors is a foriegn key of table actor  
     ,CONSTRAINT movies_actors_movies_fk FOREIGN KEY (year, title) REFERENCES cal2.movies (year, title)
         MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE
     ,CONSTRAINT movies_actors_actors_fk FOREIGN KEY (actor) REFERENCES cal2.actors (name)
         MATCH FULL ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
-INSERT INTO cal2.movies_actors(year, title, actor)
+INSERT INTO cal2.movies_actors(year, title, actor) --- populating the table using the foriegn keys of two other table. 
 SELECT
     DISTINCT ON (IMA.year, IMA.title)
     IMA.year :: INTEGER                                 AS year
@@ -426,7 +426,7 @@ SELECT name FROM cal2.import_movies_actors WHERE year = '1195' AND title = 'Cong
 
 
 \echo 'create & populate genres'
-CREATE TABLE IF NOT EXISTS cal2.movies_genres(
+CREATE TABLE IF NOT EXISTS cal2.movies_genres(    --- creatingn table genre for explicit genre using the attribute as foriegn keys of the table moives year and title 
     year                INTEGER            NOT NULL
     ,title              TEXT               NOT NULL
     ,genre              TEXT               NOT NULL
@@ -441,7 +441,7 @@ SELECT
     DISTINCT ON (year, title, genre)
     import_movies.year :: INTEGER                        AS year
     ,import_movies.title                                 AS title
-    ,regexp_split_to_table(import_movies.genres, '\s+')  AS genre
+    ,regexp_split_to_table(import_movies.genres, '\s+')  AS genre ----seperating the genres using regex. 
     FROM cal2.import_movies
         JOIN cal2.movies ON (import_movies.year :: INTEGER) = movies.year AND import_movies.title = movies.title
         ;
@@ -465,7 +465,7 @@ SELECT count(*) FROM cal2.movies;
 
 
 \echo 'create & populate website from media & review'
-CREATE TABLE IF NOT EXISTS cal2.website (
+CREATE TABLE IF NOT EXISTS cal2.website (                                               
     url                 TEXT        NOT NULL
     ,type               TEXT        NOT NULL
     ,CONSTRAINT website_pk PRIMARY KEY (url)
@@ -474,7 +474,7 @@ CREATE TABLE IF NOT EXISTS cal2.website (
 INSERT INTO cal2.website(url, type)
 SELECT
     DISTINCT
-    substring(webpage, '(https://[\/_\.a-z]+)\/' || replace(lower(author), ' ', '_'))     AS url
+    substring(webpage, '(https://[\/_\.a-z]+)\/' || replace(lower(author), ' ', '_'))     AS url     --- the url get regexed(icluding letters . and /) and authors will be replaced in the end. 
     , 'forum'                                                                               AS type
     FROM cal2.import_movies_reviews
 UNION ALL
@@ -503,7 +503,7 @@ SELECT count(DISTINCT substring(url, '(https://[\/_\.a-z]+\/assets)')) FROM cal2
 
 
 \echo 'create & populate reviews'
-CREATE TABLE IF NOT EXISTS cal2.reviews (
+CREATE TABLE IF NOT EXISTS cal2.reviews (    --- creating a table reviews using url as foriegn key and title and year also forieng keys from movies but together with author becomes the primary key. 
     year                    INTEGER         NOT NULL
     , title                 TEXT            NOT NULL
     , rating                REAL        
