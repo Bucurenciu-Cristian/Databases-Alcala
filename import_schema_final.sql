@@ -10,7 +10,7 @@ CREATE SCHEMA IF NOT EXISTS cal2;
 \echo 'creating interim tables import_*'
 
 
-
+-- here we are creating tables for the data we have in csv file using the headers and column/ attribute and simple text as we just one to bring data from csv file to tables so then we can modify and transffer and do relations. 
 
 CREATE TABLE IF NOT EXISTS cal2.import_actors(
     name                     TEXT    NOT NULL
@@ -203,14 +203,14 @@ The number of rows in the columns Containing NULL value is also shown.
 
 \echo 'create and populate table person from actors & directors'
 
-CREATE TABLE IF NOT EXISTS cal2.people(
-    full_name       TEXT        NOT NULL
-    ,coutry         TEXT
+CREATE TABLE IF NOT EXISTS cal2.people(                                         -- creating table poeple if there is no such table made before 
+    full_name       TEXT        NOT NULL                                        --- full name is string/ text andn cant be null as it will be the primary key.
+    ,coutry         TEXT                                                        
     ,birthday       DATE
     ,CONSTRAINT people_pk PRIMARY KEY (full_name)
 );
 
-INSERT INTO cal2.people (full_name, coutry, birthday)
+INSERT INTO cal2.people (full_name, coutry, birthday)                       --- inserting to this table 
 SELECT
     DISTINCT 
     name                    AS full_name
