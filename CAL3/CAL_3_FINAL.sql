@@ -701,7 +701,7 @@ BEGIN
 END
 $do$;
 
-
+GRANT USAGE on SCHEMA cal2 TO administrator;
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA cal2 TO administrator;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA cal2 TO administrator;
 
@@ -737,6 +737,7 @@ BEGIN
 END
 $do$;
 
+GRANT USAGE on SCHEMA cal2 TO manager;
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA cal2 TO manager;
 
@@ -776,6 +777,7 @@ BEGIN
    END IF;
 END
 $do$;
+GRANT USAGE on SCHEMA cal2 TO critic;
 GRANT SELECT ON ALL TABLES IN SCHEMA cal2 TO critic;
 GRANT INSERT ON TABLE cal2.reviews TO critic;
 
@@ -813,7 +815,7 @@ BEGIN
    END IF;
 END
 $do$;
-
+GRANT USAGE on SCHEMA cal2 TO Customer;
 GRANT SELECT ON ALL TABLES IN SCHEMA cal2 TO customer;
 
 -- Customer can select data from tables
